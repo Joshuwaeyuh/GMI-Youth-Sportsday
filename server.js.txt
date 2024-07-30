@@ -1,40 +1,58 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
 const bodyParser = require('body-parser');
+const fs = require('fs');
+const cors = require('cors');
 
 const app = express();
 const port = 3000;
+const dataFile = 'participants.json';
 
-// Middleware
-app.use(cors());
 app.use(bodyParser.json());
+app.use(cors());
 
-// Database setup
-const db = new sqlite3.Database(':memory:');
-db.serialize(() => {
-    db.run("CREATE TABLE participants (name TEXT, team TEXT)");
-});
+// Load participants from file
+const loadParticipants = () => {
+    if (fs.existsSync(dataFile)) {
+        const rawData = fs.readFileSync(dataFile);
+        return JSON.parse(rawData);
+    }
+    return { red: [], blue: [], green: [], yellow: [] };
+};
 
-// Endpoint to register a participant
-app.post('/register', (req, res) => {
-    const { name, team } = req.body;
-    db.run("INSERT INTO participants (name, team) VALUES (?, ?)", [name, team], function(err) {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
-        res.status(201).send({ id: this.lastID });
-    });
-});
+// Save participants to file
+const saveParticipants = (participants) => {
+    fs.writeFileSync(dataFile, JSON.stringify(participants, null, 2));
+};
 
-// Endpoint to fetch all participants
+// Get participants
 app.get('/participants', (req, res) => {
-    db.all("SELECT name, team FROM participants", [], (err, rows) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
-        res.status(200).send(rows);
-    });
+    const participants = loadParticipants();
+    res.json(participants);
+});
+
+// Add participant
+app.post('/participants', (req, res) => {
+    const { name } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: 'Name is required' });
+    }
+
+    const participants = loadParticipants();
+    const teams = Object.keys(participants);
+    const smallestTeam = teams.reduce((smallest, team) => {
+        return participants[team].length < participants[smallest].length ? team : smallest;
+    }, teams[0]);
+
+    participants[smallestTeam].push(name);
+    saveParticipants(participants);
+    res.json(participants);
+});
+
+// Reset teams
+app.post('/reset', (req, res) => {
+    const participants = { red: [], blue: [], green: [], yellow: [] };
+    saveParticipants(participants);
+    res.json(participants);
 });
 
 app.listen(port, () => {
