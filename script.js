@@ -9,29 +9,45 @@ const form = document.getElementById('registration-form');
 const nameInput = document.getElementById('name');
 const adminLoginButton = document.getElementById('admin-login');
 
-// Load teams from local storage
-const loadTeamsFromStorage = () => {
-    const storedTeams = JSON.parse(localStorage.getItem('teams'));
-    if (storedTeams) {
-        Object.keys(storedTeams).forEach(team => {
-            teams[team] = storedTeams[team];
+const API_URL = 'http://localhost:3000';
+
+// Load participants from server
+const loadTeamsFromServer = async () => {
+    try {
+        const response = await fetch(`${API_URL}/participants`);
+        const data = await response.json();
+        Object.keys(data).forEach(team => {
+            teams[team] = data[team];
         });
+        updateTeamLists();
+    } catch (error) {
+        console.error('Error loading teams from server:', error);
     }
 };
 
-// Save teams to local storage
-const saveTeamsToStorage = () => {
-    localStorage.setItem('teams', JSON.stringify(teams));
+// Save participants to server
+const saveParticipantToServer = async (name) => {
+    try {
+        const response = await fetch(`${API_URL}/participants`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name })
+        });
+        const data = await response.json();
+        Object.keys(data).forEach(team => {
+            teams[team] = data[team];
+        });
+        updateTeamLists();
+    } catch (error) {
+        console.error('Error saving participant to server:', error);
+    }
 };
 
+// Add participant to team
 const addParticipantToTeam = (name) => {
-    const teamNames = Object.keys(teams);
-    const smallestTeam = teamNames.reduce((smallest, team) => {
-        return teams[team].length < teams[smallest].length ? team : smallest;
-    }, teamNames[0]);
-    teams[smallestTeam].push(name);
-    updateTeamLists();
-    saveTeamsToStorage();
+    saveParticipantToServer(name);
 };
 
 const updateTeamLists = () => {
@@ -57,7 +73,7 @@ form.addEventListener('submit', (e) => {
     }
 });
 
-adminLoginButton.addEventListener('click', () => {
+adminLoginButton.addEventListener('click', async () => {
     const password = prompt('Enter admin password:');
     if (password === 'Iyevbol24') {
         alert('Admin access granted.');
@@ -70,7 +86,7 @@ adminLoginButton.addEventListener('click', () => {
                     let participantName = prompt('Enter participant name:');
                     if (participantName) {
                         teams[teamName].push(participantName);
-                        saveTeamsToStorage();
+                        saveParticipantToServer(participantName);
                     } else {
                         alert('Invalid name.');
                     }
@@ -78,7 +94,7 @@ adminLoginButton.addEventListener('click', () => {
                     let participantName = prompt('Enter participant name to remove:');
                     if (participantName && teams[teamName].includes(participantName)) {
                         teams[teamName] = teams[teamName].filter(name => name !== participantName);
-                        saveTeamsToStorage();
+                        saveParticipantToServer(participantName); // This part needs proper server handling for removing
                     } else {
                         alert('Participant not found.');
                     }
@@ -90,12 +106,19 @@ adminLoginButton.addEventListener('click', () => {
                 alert('Invalid team name.');
             }
         } else if (adminAction === 'reset') {
-            for (let team in teams) {
-                teams[team] = [];
+            try {
+                const response = await fetch(`${API_URL}/reset`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                Object.keys(data).forEach(team => {
+                    teams[team] = data[team];
+                });
+                updateTeamLists();
+                alert('All teams have been reset.');
+            } catch (error) {
+                console.error('Error resetting teams:', error);
             }
-            updateTeamLists();
-            saveTeamsToStorage();
-            alert('All teams have been reset.');
         } else {
             alert('Invalid action.');
         }
@@ -104,6 +127,5 @@ adminLoginButton.addEventListener('click', () => {
     }
 });
 
-// Initialize teams from local storage on page load
-loadTeamsFromStorage();
-updateTeamLists();
+// Initialize teams from server on page load
+document.addEventListener('DOMContentLoaded', loadTeamsFromServer);
