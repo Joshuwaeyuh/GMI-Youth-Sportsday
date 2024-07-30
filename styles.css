@@ -1,75 +1,159 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
 }
 
+/* Header Styles */
 header {
     background-color: #4CAF50;
     color: white;
-    padding: 10px 0;
+    padding: 20px 0;
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+/* Main Content Styles */
 main {
     padding: 20px;
+    max-width: 1000px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+/* Event Info Section */
 #event-info {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .event-image {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
     height: auto;
     margin-right: 20px;
+    border-radius: 8px;
 }
 
 .event-details {
     max-width: 600px;
+    padding: 20px;
 }
 
-#registration, #participants, #admin {
+.event-details h2 {
+    color: #4CAF50;
+}
+
+/* Registration Form Styles */
+#registration {
     margin-bottom: 20px;
+}
+
+#registration h2 {
+    color: #4CAF50;
+    text-align: center;
 }
 
 #registration form {
     display: flex;
     flex-direction: column;
-    width: 200px;
+    width: 100%;
+    max-width: 400px;
     margin: 0 auto;
 }
 
+#registration label {
+    margin: 10px 0 5px;
+}
+
 #registration input, #registration button {
+    padding: 10px;
     margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#registration button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#registration button:hover {
+    background-color: #45a049;
+}
+
+/* Participants Section */
+#participants {
+    margin-bottom: 20px;
+}
+
+#participants h2 {
+    color: #4CAF50;
+    text-align: center;
 }
 
 #teams {
     display: flex;
     justify-content: space-around;
+    flex-wrap: wrap;
 }
 
 .team {
-    width: 20%;
+    width: 45%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .team h3 {
     text-align: center;
     background-color: #eee;
     padding: 10px;
+    border-radius: 8px 8px 0 0;
 }
 
 ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 li {
-    padding: 5px;
+    padding: 10px;
     background-color: #f9f9f9;
-    margin: 5px 0;
+    margin: 5px 10px;
     border: 1px solid #ddd;
+    border-radius: 4px;
     text-align: center;
+}
+
+/* Admin Section */
+#admin {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#admin button {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f44336;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#admin button:hover {
+    background-color: #d32f2f;
 }
