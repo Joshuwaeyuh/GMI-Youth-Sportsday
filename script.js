@@ -9,6 +9,21 @@ const form = document.getElementById('registration-form');
 const nameInput = document.getElementById('name');
 const adminLoginButton = document.getElementById('admin-login');
 
+// Load teams from local storage
+const loadTeamsFromStorage = () => {
+    const storedTeams = JSON.parse(localStorage.getItem('teams'));
+    if (storedTeams) {
+        Object.keys(storedTeams).forEach(team => {
+            teams[team] = storedTeams[team];
+        });
+    }
+};
+
+// Save teams to local storage
+const saveTeamsToStorage = () => {
+    localStorage.setItem('teams', JSON.stringify(teams));
+};
+
 const addParticipantToTeam = (name) => {
     const teamNames = Object.keys(teams);
     const smallestTeam = teamNames.reduce((smallest, team) => {
@@ -16,6 +31,7 @@ const addParticipantToTeam = (name) => {
     }, teamNames[0]);
     teams[smallestTeam].push(name);
     updateTeamLists();
+    saveTeamsToStorage();
 };
 
 const updateTeamLists = () => {
@@ -54,6 +70,7 @@ adminLoginButton.addEventListener('click', () => {
                     let participantName = prompt('Enter participant name:');
                     if (participantName) {
                         teams[teamName].push(participantName);
+                        saveTeamsToStorage();
                     } else {
                         alert('Invalid name.');
                     }
@@ -61,6 +78,7 @@ adminLoginButton.addEventListener('click', () => {
                     let participantName = prompt('Enter participant name to remove:');
                     if (participantName && teams[teamName].includes(participantName)) {
                         teams[teamName] = teams[teamName].filter(name => name !== participantName);
+                        saveTeamsToStorage();
                     } else {
                         alert('Participant not found.');
                     }
@@ -76,6 +94,7 @@ adminLoginButton.addEventListener('click', () => {
                 teams[team] = [];
             }
             updateTeamLists();
+            saveTeamsToStorage();
             alert('All teams have been reset.');
         } else {
             alert('Invalid action.');
@@ -84,3 +103,7 @@ adminLoginButton.addEventListener('click', () => {
         alert('Incorrect password.');
     }
 });
+
+// Initialize teams from local storage on page load
+loadTeamsFromStorage();
+updateTeamLists();
