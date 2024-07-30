@@ -1,0 +1,42 @@
+const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
+const app = express();
+const port = 3000;
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// Database setup
+const db = new sqlite3.Database(':memory:');
+db.serialize(() => {
+    db.run("CREATE TABLE participants (name TEXT, team TEXT)");
+});
+
+// Endpoint to register a participant
+app.post('/register', (req, res) => {
+    const { name, team } = req.body;
+    db.run("INSERT INTO participants (name, team) VALUES (?, ?)", [name, team], function(err) {
+        if (err) {
+            return res.status(500).send(err.message);
+        }
+        res.status(201).send({ id: this.lastID });
+    });
+});
+
+// Endpoint to fetch all participants
+app.get('/participants', (req, res) => {
+    db.all("SELECT name, team FROM participants", [], (err, rows) => {
+        if (err) {
+            return res.status(500).send(err.message);
+        }
+        res.status(200).send(rows);
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
+});
